@@ -1,8 +1,9 @@
-#include "sosh.h"
+#include "cmds.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <string.h>
 
 void execute_who_command() {
     pid_t pid = fork();
@@ -12,7 +13,7 @@ void execute_who_command() {
         exit(EXIT_FAILURE);
     } else if (pid == 0) {
         // Child process
-        execl("/usr/bin/who", "who", NULL);
+        execlp("who", "who", NULL);
         perror("Exec failed");
         exit(EXIT_FAILURE);
     } else {
@@ -20,6 +21,32 @@ void execute_who_command() {
         int status;
         wait(&status);
     }
+}
+
+void execute_psu_command() {
+    pid_t pid = fork();
+
+    if (pid < 0) {
+        perror("Fork failed");
+        exit(EXIT_FAILURE);
+    } else if (pid == 0) {
+        // Child process
+        execlp("ps", "ps", "u", NULL);
+        perror("Exec failed");
+        exit(EXIT_FAILURE);
+    } else {
+        // Parent process
+        int status;
+        wait(&status);
+    }
+}
+
+void show_help() {
+    printf("Comandos suportados:\n");
+    printf("quem - executa o comando Unix who.\n");
+    printf("psu - lista os processos em execução do utilizador.\n");
+    printf("help - lista os comandos suportados.\n");
+    printf("exit - sai da shell.\n");
 }
 
 int main() {
@@ -32,14 +59,20 @@ int main() {
             break;
         }
 
-        // TODO: Implement command parsing and execution
-        // For now, we will execute the "who" command
-        if (strcmp(input_buffer, "who\n") == 0) {
+        // Remover a quebra de linha no final da string
+        input_buffer[strcspn(input_buffer, "\n")] = '\0';
+
+        // Verificar o comando introduzido pelo utilizador
+        if (strcmp(input_buffer, "quem") == 0) {
             execute_who_command();
-        } else if (strcmp(input_buffer, "exit\n") == 0) {
+        } else if (strcmp(input_buffer, "psu") == 0) {
+            execute_psu_command();
+        } else if (strcmp(input_buffer, "help") == 0) {
+            show_help();
+        } else if (strcmp(input_buffer, "exit") == 0) {
             break;
         } else {
-            printf("Command not supported\n");
+            printf("Comando não suportado: %s\n", input_buffer);
         }
     }
 

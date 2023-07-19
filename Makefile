@@ -12,6 +12,7 @@
 #    Since we are using implicit rules, it is possible to omit the commands
 #    out of the rules below
 
+
 CC = gcc
 CFLAGS = -g
 
@@ -19,7 +20,7 @@ CFLAGS = -g
 sosh: sosh.o 
 	gcc -o sosh sosh.o 
 
-sosh.o: sosh.c sosh.h
+sosh.o: sosh.c cmds.h
 	gcc -g -c sosh.c
 
 clean:
